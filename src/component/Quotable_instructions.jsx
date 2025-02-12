@@ -1,6 +1,7 @@
 // src/components/Quotable.jsx
 // TODO: Import the necessary hooks from React.
 import "./quote.css"; // Ensure you have your CSS set up for styling
+import { useState, useEffect } from "react";
 
 function Quotable() {
   // Step 1: Initialize state variables.
@@ -11,6 +12,10 @@ function Quotable() {
   // Array to hold fetched quotes
   // Loading state indicator
   // Error message state
+  const [quotes, setQuotes] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+
   
 
   // Step 2: Create a function "updateQuote" to fetch a random quote from the ZenQuotes API.
@@ -21,29 +26,38 @@ function Quotable() {
   const updateQuote = async () => {
     // TODO: Set the loading state to true here (e.g., call setLoading(true)) to indicate the fetch has started.
     // TODO: Also, reset any previous error by calling setError(null).
+    setLoading(true)
+    setError(null)
     
     try {
       // TODO: Make a GET request to the ZenQuotes API using a CORS proxy.
       // Hint: Use the fetch() method with the URL "https://cors-anywhere.herokuapp.com/https://zenquotes.io/api/random".
       const response = await fetch("https://cors-anywhere.herokuapp.com/https://zenquotes.io/api/random");
-
       // TODO: Check if the response is OK (i.e., response.ok === true).
       // Hint: If response.ok is false, throw an error with a message (e.g., "Failed to fetch quote").
-      
+      if (response.ok !== true) {
+        throw new Error("Failed to fetch quote")
+      }
+
+      const data = await response.json()
+      setQuotes(quotes.concat(data))
+
+
     } catch (err) {
       // TODO: Update the error state with the error message.
       // Hint: Use setError(err.message) to store the error message so it can be displayed in the UI.
-      
+      setError(err.message)
     } finally {
       // TODO: Set the loading state to false.
       // Hint: This should be done regardless of success or failure of the API call.
-      
+      setLoading(false)
     }
   };
 
   // Step 3: Use useEffect to fetch an initial quote when the component mounts.
   useEffect(() => {
     // TODO: Call updateQuote() so that a quote is fetched on component mount.
+    updateQuote()
   }, []);
 
   // Step 4: Create a function "deleteQuote" to delete a single quote.
@@ -51,6 +65,8 @@ function Quotable() {
   // - Use the filter() method to remove the quote at the given index.
   const deleteQuote = (indexToDelete) => {
     // TODO: Update the quotes state by filtering out the quote at indexToDelete.
+    const newQuotes = quotes.filter((element, index) => index !== indexToDelete)
+    setQuotes(newQuotes)
   };
 
   return (
@@ -59,7 +75,7 @@ function Quotable() {
 
       {/* Step 5: Render a button to fetch a new quote */}
       {/* TODO: Attach the updateQuote function to the onClick event of this button */}
-      <button className="btn1">
+      <button className="btn1" onClick={updateQuote}>
         New Quote
       </button>
 
@@ -81,7 +97,7 @@ function Quotable() {
                 <p className="quote-author">— {quote.a}</p>
               )}
               {/* TODO: Attach the deleteQuote function to the onClick event of this button, passing the current index */}
-              <button className="delete-btn">
+              <button className="delete-btn" onClick={() => deleteQuote(index)}>
                 Delete Quote
               </button>
             </div>
